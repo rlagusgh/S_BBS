@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bbs.Dao.BbsMapper">
+	<resultMap type="com.bbs.Domain.BbsVo" id="BbsVo">
+		<result property="BBS_NUM" column="BBS_NUM" />
+		<result property="NAME" column="NAME" />
+		<result property="PASSWORD" column="PASSWORD" />
+		<result property="TITLE" column="TITLE" />
+		<result property="EMAIL" column="EMAIL" />
+		<result property="CONTENTS" column="CONTENTS" />
+		<result property="CRE_DATE" column="CRE_DATE" />
+		<result property="READCOUNT" column="READCOUNT" />
+	</resultMap>
+	
+	<select id="getAllBbs" resultMap="BbsVo">
+		SELECT * FROM BBS ORDER BY BBS_NUM DESC;
+	</select>
+	
+	<select id="getRowBbs" resultMap="BbsVo">
+		select * from BBS from BBS where BBS_NUM BETWEEN #{START_ROW} AND #{END_ROW} 
+	</select>
+	
+	<select id="getSearchBbs" resultMap="BbsVo">
+		<choose>
+			<when test="#{SEARCH_TYPE == 'TOTAL'}">
+				SELECT * FROM BBS WHERE TITLE LIKE CONCAT('%',#{KEYWORD},'%') OR CONTENTS LIKE CONCAT('%',#{KEYWORD},'%') OR NAME LIKE CONCAT('%',#{KEYWORD},'%') ORDER BY BBS_NUM ASC
+			</when>
+			
+			<when test="#{SEARCH_TYPE == 'TITLE'}">
+				SELECT * FROM BBS WHERE TITLE LIKE CONCAT('%',#{KEYWORD},'%') ORDER BY BBS_NUM ASC"
+			</when>
+			
+			<when test="#{SEARCH_TYPE == 'CONTENTS'}">
+				SELECT * FROM BBS WHERE CONTENTS LIKE CONCAT('%',#{KEYWORD},'%') ORDER BY BBS_NUM ASC
+			</when>
+			
+			<when test="#{SEARCH_TYPE == 'NAME'}">
+				SELECT * FROM BBS WHERE USER_ID LIKE CONCAT('%',#{KEYWORD},'%') ORDER BY BBS_NUM ASC
+			</when>
+			
+			<when test="#{SEARCH_TYPE == 'TITLE_CONTENTS'}">
+				SELECT * FROM BBS WHERE TITLE LIKE CONCAT('%',#{KEYWORD},'%') OR CONTENTS LIKE CONCAT('%',#{KEYWORD},'%') ORDER BY BBS_NUM ASC
+			</when>
+		</choose>
+	</select>
+	
+	<insert id="addBbs">
+		INSERT INTO BBS(NAME,PASSWORD,TITLE,EMAIL,CONTENTS,CRE_DATE,READCOUNT) VALUES(#{NAME},#{PASSWORD},#{TITLE},#{EMAIL},#{CONTENTS},NOW(),0)
+	</insert>
+	
+	<insert id="addReply">
+		INSERT INTO BBS(BBS_NUM,NAME,PASSWORD,TITLE,EMAIL,CONTENTS,CRE_DATE,READCOUNT) VALUES(#{BBS_NUM},#{NAME},#{PASSWORD},#{TITLE},#{EMAIL},#{CONTENTS},NOW(),0)
+	</insert>
+	
+	<delete id="deleteAllBbs">
+		DELETE FROM BBS
+	</delete>
+	
+	<delete id="deleteBbs">
+		DELETE FROM BBS WHERE BBS_NUM = #{BBS_NUM}
+	</delete>
+	
+	<select id="countAllBbs" resultType="int">
+		SELECT COUNT(*) FROM BBS
+	</select>
+	
+	<select id="countAllSearchBbs" resultType="int">
+		<choose>
+			<when test="#{SEARCH_TYPE == 'TOTAL'}">
+				SELECT COUNT(*) FROM BBS WHERE TITLE LIKE CONCAT('%',#{KEYWORD},'%') OR CONTENTS LIKE CONCAT('%',#{KEYWORD},'%') OR NAME LIKE CONCAT('%',#{KEYWORD},'%')
+			</when>
+			
+			<when test="#{SEARCH_TYPE == 'TITLE'}">
+				SELECT COUNT(*) FROM BBS WHERE TITLE LIKE CONCAT('%',#{KEYWORD},'%')
+			</when>
+			
+			<when test="#{SEARCH_TYPE == 'CONTENTS'}">
+				SELECT COUNT(*) FROM BBS WHERE CONTENTS LIKE CONCAT('%',#{KEYWORD},'%')
+			</when>
+			
+			<when test="#{SEARCH_TYPE == 'NAME'}">
+				SELECT COUNT(*) FROM BBS WHERE USER_ID LIKE CONCAT('%',#{KEYWORD},'%')
+			</when>
+			
+			<when test="#{SEARCH_TYPE == 'TITLE_CONTENTS'}">
+				SELECT COUNT(*) FROM BBS WHERE TITLE LIKE CONCAT('%',#{KEYWORD},'%') OR CONTENTS LIKE CONCAT('%',#{KEYWORD},'%')
+			</when>
+		</choose>
+	</select>
+	
+	<select id="getBbs" resultMap="BbsVo">
+		SELECT * FROM BBS WHERE BBS_NUM = #{BBS_NUM}
+	</select>
+	
+	<update id="incre_Readcount">
+		UPDATE 	BBS SET READCOUNT = READCOUNT+1 WHERE BBS_NUM = #{BBS_NUM}
+	</update>
+	
+	<update id="updateBbs">
+		UPDATE BBS SET TITLE=#{TITLE},EMAIL=#{EMAIL},CONTENTS=#{CONTENTS} WHERE BBS_NUM=#{BBS_NUM}
+	</update>
+	
+	<update id="ReplyUpdate">
+		UPDATE BBS SET BBS_NUM = BBS_NUM + 1 WHERE BBS_NUM >= #{BBS_NUM} ORDER BY BBS_NUM DESC	
+	</update>
+</mapper>
